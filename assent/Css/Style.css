@@ -68,7 +68,7 @@ a {
 }
 
 .container {
-    height: 650px;
+    height: 647px;
 }
 
 
@@ -84,4 +84,8 @@ a {
 
 .card {
     background-color: #8c8c8c !important;
+}
+
+.targetdeta{
+    height: 663px !important;
 }

@@ -1,30 +1,72 @@
+import { data as localdata } from "./data.js";
+const ApiURL = "https://mindhub-xj03.onrender.com/api/amazing"
+
+async function obtain_EventsData() {
+
+    try {
+
+        const response = await fetch(ApiURL)
+        const exterdata = await response.json()
+        return exterdata
+
+    } catch (error) {
+
+        console.log("API couldn't be reached, local data will be used instead");
+        return localdata
+
+    };
+
+};
+
 function createID(text) {
     return text.toLowerCase().replace(/\s+/g, "-");
 }
 
-function createCategories() {
+async function createCategories() {
+    try {
 
-    let EventsGroup = []
-    let CategoriesGroup = []
-    let CategoriesHTMLSection = ""
+        const data = await obtain_EventsData()
+        console.log(data);
 
-    data.events.forEach(event => {
-        if (!CategoriesGroup.includes(event.category)) {
+        let EventsGroup = []
+        let CategoriesGroup = []
+        let CategoriesHTMLSection = ""
+        let PageTitle = document.title
 
-            CategoriesGroup.push(event.category);
+        data.events.forEach(event => {
 
-            CategoriesHTMLSection += `
-                <input type="checkbox" class="btn-check" id="btncheck-${event.category}" value="${event.category}">
-                <label class="btn categories-category" for="btncheck-${event.category}">${event.category}</label>
+            if (PageTitle == "Home" || ((PageTitle == "Past Events") ? event.date < data.currentDate : event.date >= data.currentDate)) {
+
+            if (!CategoriesGroup.includes(event.category)) {
+
+                CategoriesGroup.push(event.category);
+
+                CategoriesHTMLSection += `
+                <input type="checkbox" class="btn-check" id="btncheck-${event._id}" value="${event.category}">
+                <label class="btn categories-category" for="btncheck-${event._id}">${event.category}</label>
             `;
+            };
+            EventsGroup.push(event)
         };
-
-        EventsGroup.push(event)
     });
 
-    document.getElementById("categories").innerHTML = CategoriesHTMLSection
-    return EventsGroup
+        document.getElementById("categories").innerHTML = CategoriesHTMLSection
+
+        const CheckboxGroup = [...document.querySelectorAll("input[class = btn-check")]
+        const SearchInput = document.getElementById("SearchInput")
+
+        CheckboxGroup.forEach(checkbox => {
+            checkbox.addEventListener("click", updateEventsShown)
+        });
+
+        SearchInput.addEventListener("keyup", updateEventsShown)
+        return EventsGroup
+    } catch (error) {
+        console.log(error)
+    };
 };
+
+
 function updateEventsShown() {
 
     let EventsHTMLSection = "";
@@ -54,19 +96,11 @@ function updateEventsShown() {
     });
     if (EventsHTMLSection == "") {
         alert("Adjust the filters to find an event")
-    }
+    };
 
     document.getElementById("events").innerHTML = EventsHTMLSection
 };
 
-const EventsAvailable = createCategories()
-const CheckboxGroup = [...document.querySelectorAll("input[class = btn-check")]
-const SearchInput = document.getElementById("SearchInput")
+const EventsAvailable = await createCategories()
 
 updateEventsShown()
-
-CheckboxGroup.forEach(checkbox => {
-    checkbox.addEventListener("click", updateEventsShown)
-})
-
-SearchInput.addEventListener("keyup", updateEventsShown)

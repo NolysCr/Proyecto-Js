@@ -1,8 +1,28 @@
-const event_id = new URLSearchParams(location.search).get("id")
+import { data as localdata } from "./data.js";
+const ApiURL = "https://mindhub-xj03.onrender.com/api/amazing"
 
-const event = data.events.find(event => event._id == event_id)
+async function obtain_EventsData() {
+
+    try {
+
+        const response = await fetch(ApiURL)
+        const exterdata = await response.json()
+        return exterdata
+
+    } catch (error) {
+
+        console.log("API couldn't be reached, local data will be used instead");
+        return localdata
+
+    };
+
+};
 
 function createDetailsCard() {
+
+    const event_id = new URLSearchParams(location.search).get("id")
+
+    const event = data.events.find(event => event._id == event_id)
 
     CardMainDetails.innerHTML = `
     <div class="d-flex align-items-center h-100 w-100">
@@ -23,5 +43,6 @@ function createDetailsCard() {
     `;
 
 }
+const data = await obtain_EventsData()
 
 createDetailsCard()
